@@ -1,8 +1,18 @@
 import React, { Component } from 'react';
+import Ai from './Ai.js'
 import Web3 from 'web3'
-import './App.css';
+import '../css/App.css';
+import '../css/style.css';
 import MemoryToken from '../abis/MemoryToken.json'
 import brain from '../brain.png'
+
+
+import PanelComponent from "./PanelComponent.js";
+
+// import "../libs/blockly/blockly_compressed_exp.js"
+// import "../libs/blockly/blocks_compressed.js"
+// import "../libs/blockly/javascript_compressed.js"
+// import "../libs/blockly/en.js"
 
 const CARD_ARRAY = [
   {
@@ -48,6 +58,214 @@ const CARD_ARRAY = [
   {
     name: 'milkshake',
     img: '/images/milkshake.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'fries',
+    img: '/images/fries.png'
+  },
+  {
+    name: 'cheeseburger',
+    img: '/images/cheeseburger.png'
+  },
+  {
+    name: 'ice-cream',
+    img: '/images/ice-cream.png'
+  },
+  {
+    name: 'pizza',
+    img: '/images/pizza.png'
+  },
+  {
+    name: 'milkshake',
+    img: '/images/milkshake.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'fries',
+    img: '/images/fries.png'
+  },
+  {
+    name: 'cheeseburger',
+    img: '/images/cheeseburger.png'
+  },
+  {
+    name: 'ice-cream',
+    img: '/images/ice-cream.png'
+  },
+  {
+    name: 'pizza',
+    img: '/images/pizza.png'
+  },
+  {
+    name: 'milkshake',
+    img: '/images/milkshake.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'fries',
+    img: '/images/fries.png'
+  },
+  {
+    name: 'cheeseburger',
+    img: '/images/cheeseburger.png'
+  },
+  {
+    name: 'ice-cream',
+    img: '/images/ice-cream.png'
+  },
+  {
+    name: 'pizza',
+    img: '/images/pizza.png'
+  },
+  {
+    name: 'milkshake',
+    img: '/images/milkshake.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'fries',
+    img: '/images/fries.png'
+  },
+  {
+    name: 'cheeseburger',
+    img: '/images/cheeseburger.png'
+  },
+  {
+    name: 'ice-cream',
+    img: '/images/ice-cream.png'
+  },
+  {
+    name: 'pizza',
+    img: '/images/pizza.png'
+  },
+  {
+    name: 'milkshake',
+    img: '/images/milkshake.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'fries',
+    img: '/images/fries.png'
+  },
+  {
+    name: 'cheeseburger',
+    img: '/images/cheeseburger.png'
+  },
+  {
+    name: 'ice-cream',
+    img: '/images/ice-cream.png'
+  },
+  {
+    name: 'pizza',
+    img: '/images/pizza.png'
+  },
+  {
+    name: 'milkshake',
+    img: '/images/milkshake.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'fries',
+    img: '/images/fries.png'
+  },
+  {
+    name: 'cheeseburger',
+    img: '/images/cheeseburger.png'
+  },
+  {
+    name: 'ice-cream',
+    img: '/images/ice-cream.png'
+  },
+  {
+    name: 'pizza',
+    img: '/images/pizza.png'
+  },
+  {
+    name: 'milkshake',
+    img: '/images/milkshake.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
+  },
+  {
+    name: 'hotdog',
+    img: '/images/hotdog.png'
   },
   {
     name: 'hotdog',
@@ -179,6 +397,9 @@ class App extends Component {
   render() {
     return (
       <div>
+        <Ai/>
+        <PanelComponent/>
+        
         <nav className="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
           <a
             className="navbar-brand col-sm-3 col-md-2 mr-0"
