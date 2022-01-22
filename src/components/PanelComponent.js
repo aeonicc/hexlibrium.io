@@ -2,11 +2,7 @@ import React from 'react'
 import s from '../css/PanelComponent.module.css'
 
 const  PanelComponent = () => {
-
-
-
     return (
-
 
     <div className={s.panel}>
         <div className={s.pos}>

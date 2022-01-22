@@ -1,206 +1,210 @@
 import React, { Component } from 'react';
-
 import * as YUKA from '../libs/yuka/yuka.module.js';
 import * as THREE from 'three';
 
-import {MapControls} from "three/examples/jsm/controls/OrbitControls";
-import {DragControls} from "three/examples/jsm/controls/DragControls";
-import {GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
-import droneModel from "../assets/drone.glb";
-import cityModel from "../assets/lavoro.glb";
-import img01 from "../images/metam.png";
 
+class Scene extends Component {
 
-class Ai extends Component {
+    componentDidMount() {   
 
-    componentDidMount() {
+        let time = new YUKA.Time();
+        let target = [];
+        let vehicle = []
+        let entityManager=[];
+        const obstacles = new Array();
 
-        //
+        function arrive()
+        {
 
-        
-
-		// let renderer, scene, camera;
-
-		let entityManager, time, vehicle, target;
-
-        var scene, renderer, camera, city;
-        let raycaster, selectedPath;
-        let drone;
-        let models = [],
-            objects = [],
-            selected = [],
-            points = [],
-            linesPr = []
-        let i = 0, t = 0, dt = 0.002,
-            a, b
-        let pathCheck = false
-
-        const buttons = document.getElementsByTagName("button");
-        for (let r = 0; r < buttons.length; r++) {
-            buttons[r].addEventListener("click", onButtonClick, false);
-        }
-
-        function onButtonClick() {
-
-            if (linesPr.length >= 1) {
-                scene.remove(linesPr[0])
-                linesPr = []
-                points = []
-            }
-
-            if (drone.visible === true) {
-                objects.forEach(element => points.push(element.position))
-                points.push(objects[0].position)
-                const geometryLine = new THREE.BufferGeometry().setFromPoints(points);
-                const materialLine = new THREE.LineBasicMaterial({color: 0xffffff});
-                const line = new THREE.Line(geometryLine, materialLine);
-                linesPr.push(line);
-                scene.add(line);
-                pathCheck = true;
-            }
-        }
-
-        let input = document.querySelector('input');
-        input.addEventListener('change', onAlt)
-
-        function onAlt() {
-            if (drone.visible === true) {
-                selected[0].position.y = input.value
-            }
-        }
-
-
-        renderer = new THREE.WebGLRenderer({antialias: true, alpha:true});
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-        this.mount.appendChild(renderer.domElement);
-        renderer.setPixelRatio(devicePixelRatio);
-        const mouse = new THREE.Vector2();
-
-
-        camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 10000);
-
-        camera.position.z = 235;
-        camera.position.y = 50;
-        camera.position.x = -234;
-        camera.target = new THREE.Vector3();
-
-        const mapControls = new MapControls(camera, renderer.domElement);
-        mapControls.maxPolarAngle = Math.PI / 2;
-
-        const dragControls = new DragControls(objects, camera, renderer.domElement);
-        dragControls.addEventListener('dragstart', function (event) {
-            mapControls.enabled = false;
-            selected[0].material.color.setHex(0x42aaf5)
-            selected.pop()
-
-        });
-        dragControls.addEventListener('dragend', function (event) {
-            mapControls.enabled = true;
-            selectedPath = event.object
-            selectedPath.material.color.setHex(0xc91625)
-            selected.push(selectedPath)
-            document.getElementById("posX").innerHTML = 'Position X   ' + Math.round(event.object.position.x)
-            document.getElementById("posZ").innerHTML = 'Position Z   ' + Math.round(event.object.position.z)
-            input.value = Math.round(event.object.position.y)
-        });
-
-
-        scene = new THREE.Scene();
-        scene.add(new THREE.AmbientLight(0x404040));
-        raycaster = new THREE.Raycaster();
-        const loader = new GLTFLoader();
-
-        loadDrone();
-        loadCity();
-        init()
-
-        
-		// init();
-		// animate();
-
-		function init() {
-
-			// scene = new THREE.Scene();
-
-			// camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 0.1, 1000 );
-			// camera.position.set( 0, 0, 10 );
-			// camera.lookAt( scene.position );
-
-			//
-
-			const vehicleGeometry = new THREE.ConeBufferGeometry( 5, 8, 8 );
+            const vehicleGeometry = new THREE.ConeBufferGeometry( 1, 5, 8 );
 			vehicleGeometry.rotateX( Math.PI * 0.5 );
 			const vehicleMaterial = new THREE.MeshNormalMaterial();
 
 			const vehicleMesh = new THREE.Mesh( vehicleGeometry, vehicleMaterial );
 			vehicleMesh.matrixAutoUpdate = false;
-			scene.add( vehicleMesh );
+			this.scene.add( vehicleMesh );
 
-			const targetGeometry = new THREE.SphereBufferGeometry( 5 );
+			const targetGeometry = new THREE.SphereBufferGeometry( 1 );
 			const targetMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
 
 			const targetMesh = new THREE.Mesh( targetGeometry, targetMaterial );
 			targetMesh.matrixAutoUpdate = false;
-			scene.add( targetMesh );
+			this.scene.add( targetMesh );
 
 			//
 
-			const sphereGeometry = new THREE.SphereBufferGeometry( 2, 32, 32 );
+			const sphereGeometry = new THREE.SphereBufferGeometry( 20, 32, 32 );
 			const sphereMaterial = new THREE.MeshBasicMaterial( { color: 0xcccccc, wireframe: true, transparent: true, opacity: 0.2 } );
 			const sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
-			scene.add( sphere );
+			this.scene.add( sphere );
 
-			//
-
-			// renderer = new THREE.WebGLRenderer( { antialias: true } );
-			// renderer.setPixelRatio( window.devicePixelRatio );
-			// renderer.setSize( window.innerWidth, window.innerHeight );
-			// document.body.appendChild( renderer.domElement );
-
-			//
-
-			// window.addEventListener( 'resize', onWindowResize, false );
+            loader.load(droneModel, function (gltf) {
+                dron = gltf.scene
+                this.scene.add(dron);
+                dron.scale.set(0.2, 0.2, 0.2)
+                dron.position.y = 30
+                // dron.visible = false
+                // dron.rotation.y = 90
+                model.push(dron)
+            });
 
 			// game setup
 
-			entityManager = new YUKA.EntityManager();
-			time = new YUKA.Time();
+			entityManager[0] = new YUKA.EntityManager();
+			// time = new YUKA.Time();
 
-			target = new YUKA.GameEntity();
-			target.setRenderComponent( targetMesh, sync );
+			target[0] = new YUKA.GameEntity();
+			target[0].setRenderComponent( targetMesh, sync );
 
-			vehicle = new YUKA.Vehicle();
-			vehicle.setRenderComponent( vehicleMesh, sync );
+			vehicle[0] = new YUKA.Vehicle();
+            // vehicle.maxSpeed = 500
+			vehicle[0].setRenderComponent( vehicleMesh, sync );
+            
+            // const arriveBehavior = new YUKA.SeekBehavior( target[0].position );
+			const arriveBehavior = new YUKA.ArriveBehavior( target[0].position, 2.5, 0.1 );
+			vehicle[0].steering.add( arriveBehavior );
 
-			const arriveBehavior = new YUKA.ArriveBehavior( target.position, 2.5, 0.1 );
-			vehicle.steering.add( arriveBehavior );
-
-			entityManager.add( target );
-			entityManager.add( vehicle );
+			entityManager[0].add( target[0] );
+			entityManager[0].add( vehicle[0] );
 
 			generateTarget();
+        }
 
-		}
+        function obstacle(){
 
-		// function onWindowResize() {
+            const vehicleGeometry = new THREE.ConeBufferGeometry( 1, 5, 8 );
+			vehicleGeometry.rotateX( Math.PI * 0.5 );
+			vehicleGeometry.computeBoundingSphere();
+			const vehicleMaterial = new THREE.MeshNormalMaterial();
 
-		// 	camera.aspect = window.innerWidth / window.innerHeight;
-		// 	camera.updateProjectionMatrix();
+			const vehicleMesh = new THREE.Mesh( vehicleGeometry, vehicleMaterial );
+			vehicleMesh.matrixAutoUpdate = false;
+			this.scene.add( vehicleMesh );
 
-		// 	renderer.setSize( window.innerWidth, window.innerHeight );
+			// const gridHelper = new THREE.GridHelper( 25, 25 );
+			// this.scene.add( gridHelper );
 
-		// }
+			// game setup
 
-		// function animate() {
+			entityManager[1] = new YUKA.EntityManager();
+			// time = new YUKA.Time();
 
-		// 	requestAnimationFrame( animate );
+			const path = new YUKA.Path();
+			path.loop = true;
+			path.add( new YUKA.Vector3( 10, 0, 10 ) );
+			path.add( new YUKA.Vector3( 10, 0, - 10 ) );
+			path.add( new YUKA.Vector3( - 10, 0, - 10 ) );
+			path.add( new YUKA.Vector3( 0, 0, 10 ) );
 
+
+			// triangule = [
+			// 	const x = 1,
+			// 	const y = 1,
+			// 	const z = 1,
+
+			// ]
+
+			const cubeGeometry=new THREE.BoxBufferGeometry(10,10,10)
+			const cubeMaterial=new THREE.MeshPhongMaterial({color: 0xffffff, wireframe: true})
+			const cubeMesh=new THREE.Mesh(cubeGeometry, cubeMaterial)
+			// cubeMesh.position.set(3,0,1)
+			this.scene.add(cubeMesh)
+			cubeMesh.position.setX = 20
+			
 		
+			vehicle[1] = new YUKA.Vehicle();
+            // vehicle[].velocity = 10
+			vehicle[1].maxSpeed = 30;
+			vehicle[1].setRenderComponent( vehicleMesh, sync );
 
-			// renderer.render( scene, camera );
+			vehicle[1].boundingRadius = vehicleGeometry.boundingSphere.radius;
+			vehicle[1].smoother = new YUKA.Smoother( 20 );
 
-		// }
+			entityManager[1].add( vehicle[1] );
+
+			const obstacleAvoidanceBehavior = new YUKA.ObstacleAvoidanceBehavior( obstacles );
+			vehicle[1].steering.add( obstacleAvoidanceBehavior );
+
+			const followPathBehavior = new YUKA.FollowPathBehavior( path );
+			vehicle[1].steering.add( followPathBehavior );
+
+            setupObstacles();
+
+        }
+
+        function seekANDdestroy(){
+
+            const vehicleGeometry = new THREE.ConeBufferGeometry( 1, 5, 8 );
+			vehicleGeometry.rotateX( Math.PI * 0.5 );
+			vehicleGeometry.computeBoundingSphere();
+			const vehicleMaterial = new THREE.MeshNormalMaterial();
+
+			const vehicleMesh = new THREE.Mesh( vehicleGeometry, vehicleMaterial );
+			vehicleMesh.matrixAutoUpdate = false;
+			this.scene.add( vehicleMesh );
+
+			// const gridHelper = new THREE.GridHelper( 25, 25 );
+			// this.scene.add( gridHelper );
+
+			// game setup
+
+			entityManager[2] = new YUKA.EntityManager();
+            entityManager[3] = new YUKA.EntityManager();
+			// time = new YUKA.Time();
+
+			const path = new YUKA.Path();
+			path.loop = true;
+			path.add( new YUKA.Vector3( 10, 0, 10 ) );
+			path.add( new YUKA.Vector3( 10, 0, - 10 ) );
+			path.add( new YUKA.Vector3( - 10, 0, - 10 ) );
+			path.add( new YUKA.Vector3( 0, 0, 10 ) );
+
+
+            const targetGeometry = new THREE.SphereBufferGeometry( 1 );
+			const targetMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+            const targetMesh = new THREE.Mesh( targetGeometry, targetMaterial );
+			targetMesh.matrixAutoUpdate = false;
+			this.scene.add( targetMesh );
+
+			const cubeGeometry=new THREE.BoxBufferGeometry(10,10,10)
+			const cubeMaterial=new THREE.MeshPhongMaterial({color: 0xffffff, wireframe: true})
+			const cubeMesh=new THREE.Mesh(cubeGeometry, cubeMaterial)
+			// cubeMesh.position.set(3,0,1)
+			this.scene.add(cubeMesh)
+			cubeMesh.position.setX = 20
+
+            target[2] = new YUKA.GameEntity();
+			target[2].setRenderComponent( targetMesh, sync );
+			
+		
+			vehicle[2] = new YUKA.Vehicle();
+            // vehicle[].velocity = 10
+			// vehicle[2].maxSpeed = 30;
+			vehicle[2].setRenderComponent( vehicleMesh, sync );
+
+			// vehicle[2].boundingRadius = vehicleGeometry.boundingSphere.radius;
+			// vehicle[2].smoother = new YUKA.Smoother( 20 );
+
+			// entityManager[2].add( vehicle[2] );
+
+			// const obstacleAvoidanceBehavior = new YUKA.ObstacleAvoidanceBehavior( obstacles );
+			// vehicle[2].steering.add( obstacleAvoidanceBehavior );
+
+			// const followPathBehavior = new YUKA.FollowPathBehavior( path );
+			// vehicle[2].steering.add( followPathBehavior );
+
+            // const arriveBehavior = new YUKA.SeekBehavior( target[2].position );
+			const arriveBehavior = new YUKA.ArriveBehavior( target[2].position, 2.5, 0.1 );
+			vehicle[2].steering.add( arriveBehavior );
+
+
+			entityManager[2].add( target[2] );
+			entityManager[2].add( vehicle[2] );
+			
+
+            generateTargett();
+            // setupObstacless();
+        }
 
 		function sync( entity, renderComponent ) {
 
@@ -216,179 +220,111 @@ class Ai extends Component {
 			const phi = Math.acos( ( 2 * Math.random() ) - 1 );
 			const theta = Math.random() * Math.PI * 2;
 
-			target.position.fromSpherical( radius, phi, theta );
+			target[0].position.fromSpherical( radius, phi, theta );
+
+			setTimeout( generateTarget, 10000 );
+
+		}
+
+        function generateTargett() {
+
+			// generate a random point on a sphere
+
+			const radius = 20;
+			const phi = Math.acos( ( 2 * Math.random() ) - 1 );
+			const theta = Math.random() * Math.PI * 2;
+
+			target[2].position.fromSpherical( radius, phi, theta );
 
 			setTimeout( generateTarget, 10000 );
 
 		}
 
         //
+        function setupObstacles() {
 
- 
+			const geometry = new THREE.BoxBufferGeometry( 2, 2, 2 );
+			geometry.computeBoundingSphere();
+			const material = new THREE.MeshPhongMaterial( { color: 0xff0000 } );
 
-        function loadDrone() {
+			const mesh1 = new THREE.Mesh( geometry, material );
+			const mesh2 = new THREE.Mesh( geometry, material );
+			const mesh3 = new THREE.Mesh( geometry, material );
+					
 
-            loader.load(droneModel, function (gltf) {
-                drone = gltf.scene
-                scene.add(drone);
-                drone.scale.set(0.2, 0.2, 0.2)
-                drone.position.y = 30
-                drone.visible = false
-                drone.rotation.y = 90
-                models.push(drone)
-            });
-        }
+			mesh1.position.set( - 10, 0, 0 );
+			mesh2.position.set( 12, 0, 0 );
+			mesh3.position.set( 4, 0, - 10 );
+			
 
-        function loadCity() {
+			this.scene.add( mesh1 );
+			this.scene.add( mesh2 );
+			this.scene.add( mesh3 );			
 
-            loader.load(cityModel, function (gltf) {
-                city = gltf.scene
-                scene.add(city);
-            });
+			const obstacle1 = new YUKA.GameEntity();
+			obstacle1.position.copy( mesh1.position );
+			obstacle1.boundingRadius = geometry.boundingSphere.radius;
+			entityManager[1].add( obstacle1 );
+			obstacles.push( obstacle1 );
 
+			const obstacle2 = new YUKA.GameEntity();
+			obstacle2.position.copy( mesh2.position );
+			obstacle2.boundingRadius = geometry.boundingSphere.radius;
+			entityManager[1].add( obstacle2 );
+			obstacles.push( obstacle2 );
 
+			const obstacle3 = new YUKA.GameEntity();
+			obstacle3.position.copy( mesh3.position );
+			obstacle3.boundingRadius = geometry.boundingSphere.radius;
+			entityManager[1].add( obstacle3 );
+			obstacles.push( obstacle3 );
 
-        }
+            }
+            
+            function setupObstacless() {
 
-        document.addEventListener('mousemove', onDocumentMouseMove, false);
-        window.addEventListener('resize', onWindowResize, false);
-        document.addEventListener('touchend', onTouchMove, false);
-        document.addEventListener('dblclick', createPath, false)
-
-        function createPath() {
-
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(scene.children, true);
-
-            if (intersects.length > 0) {
-
-                const sphereGeometry = new THREE.SphereGeometry(1.2, 32, 32);
-                const sphereMaterial = new THREE.MeshBasicMaterial({color: 0x42aaf5});
-                const spherePath = new THREE.Mesh(sphereGeometry, sphereMaterial);
-                scene.add(spherePath);
-                spherePath.position.y = intersects[0].point.y + 30
-                spherePath.position.x = intersects[0].point.x
-                spherePath.position.z = intersects[0].point.z
-                objects.push(spherePath)
-                document.getElementById("posX").innerHTML = 'Position X ' + Math.round(spherePath.position.x)
-                document.getElementById("posZ").innerHTML = 'Position Z ' + Math.round(spherePath.position.z)
-                input.value = Math.round(spherePath.position.y)
-                if (!drone.visible) {
-                    drone.visible = true;
-                    drone.position.copy(spherePath.position)
-                    selected.push(spherePath)
+                const geometry = new THREE.BoxBufferGeometry( 2, 2, 2 );
+                geometry.computeBoundingSphere();
+                const material = new THREE.MeshPhongMaterial( { color: 0xff0000 } );
+    
+                const mesh1 = new THREE.Mesh( geometry, material );
+                const mesh2 = new THREE.Mesh( geometry, material );
+                const mesh3 = new THREE.Mesh( geometry, material );
+                        
+    
+                mesh1.position.set( - 10, 0, 0 );
+                mesh2.position.set( 12, 0, 0 );
+                mesh3.position.set( 4, 0, - 10 );
+                
+    
+                this.scene.add( mesh1 );
+                this.scene.add( mesh2 );
+                this.scene.add( mesh3 );			
+    
+                const obstacle1 = new YUKA.GameEntity();
+                obstacle1.position.copy( mesh1.position );
+                obstacle1.boundingRadius = geometry.boundingSphere.radius;
+                entityManager[3].add( obstacle1 );
+                obstacles.push( obstacle1 );
+    
+                const obstacle2 = new YUKA.GameEntity();
+                obstacle2.position.copy( mesh2.position );
+                obstacle2.boundingRadius = geometry.boundingSphere.radius;
+                entityManager[3].add( obstacle2 );
+                obstacles.push( obstacle2 );
+    
+                const obstacle3 = new YUKA.GameEntity();
+                obstacle3.position.copy( mesh3.position );
+                obstacle3.boundingRadius = geometry.boundingSphere.radius;
+                entityManager[3].add( obstacle3 );
+                obstacles.push( obstacle3 );
+    
                 }
-            } else {
-                return
-            }
-        }
+          
 
-
-        function onWindowResize() {
-
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        function onDocumentMouseMove(event) {
-
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        }
-
-        function onTouchMove(event) {
-
-            let x, y;
-            if (event.changedTouches) {
-                x = event.changedTouches[0].pageX;
-                y = event.changedTouches[0].pageY;
-            } else {
-                x = event.clientX;
-                y = event.clientY;
-            }
-            mouse.x = (x / window.innerWidth) * 2 - 1;
-            mouse.y = -(y / window.innerHeight) * 2 + 1;
-        }
-
-
-        function ease(t) {
-            return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
-        }
-
-        function lint(a, b, t) {
-            return a + (b - a) * t
-        }
-
-
-        function animDrone() {
-
-            a = {x: objects[i].position.x, y: objects[i].position.y, z: objects[i].position.z}
-            b = {x: objects[i + 1].position.x, y: objects[i + 1].position.y, z: objects[i + 1].position.z}
-            const newX = lint(a.x, b.x, ease(t));
-            const newY = lint(a.y, b.y, ease(t));
-            const newZ = lint(a.z, b.z, ease(t));
-            models[0].position.set(newX, newY, newZ);
-        }
-
-        function loopDrone() {
-
-            b = {x: objects[0].position.x, y: objects[0].position.y, z: objects[0].position.z}
-            a = {
-                x: objects[objects.length - 1].position.x,
-                y: objects[objects.length - 1].position.y,
-                z: objects[objects.length - 1].position.z
-            }
-            const newX = lint(a.x, b.x, ease(t));
-            const newY = lint(a.y, b.y, ease(t));
-            const newZ = lint(a.z, b.z, ease(t));
-            models[0].position.set(newX, newY, newZ);
-        }
-
-        const animate = () => {
-            requestAnimationFrame(animate);
-
-            if (pathCheck === true) {
-                if (i === objects.length - 1) {
-                    loopDrone()
-                    drone.lookAt(new THREE.Vector3(objects[0].position.x, objects[0].position.y, objects[0].position.z))
-                    t += dt
-                    if (t >= 1) {
-                        i = 0
-                        t = 0
-                    }
-                } else {
-
-                    animDrone()
-                    drone.lookAt(new THREE.Vector3(objects[i].position.x, objects[i].position.y , objects[i].position.z))
-                    t += dt;
-                    if (t >= 1) {
-                        i++
-                        t = 0
-                        t += dt
-                    }
-                }
-            }
-
-            const delta = time.update().getDelta();
-
-			entityManager.update( delta );
-
-            renderer.render(scene, camera);
-
-        };
-        animate();
-    }
-
-    render() {
-        return (
-            <div ref={ref => (this.mount = ref)}/>
-        )
     }
 }
 
-export default Ai
 
-
-
+export default Scene
 
