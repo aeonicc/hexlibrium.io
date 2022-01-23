@@ -40,13 +40,14 @@ section:nth-child(odd)
 
 .hero .title{
   color: #ffba02;
-  font-size: 3em;
+  font-size: 10em;
   margin-bottom: .5em;
 }
 
 .hero .text{
   letter-spacing: 1px;
   line-height: 1.5;
+  font-size: 5em;
   color: rgb(238, 238, 238);
   margin-bottom: 1em;
 }
